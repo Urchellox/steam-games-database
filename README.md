@@ -19,7 +19,7 @@ Connect to database using mysql shell:
 \sql  
 \connect root@localhost:3306  
 show databases;  
-use valorant_stats;  
+use games;  
 
   
 Start:  
