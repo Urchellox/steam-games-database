@@ -1,4 +1,7 @@
-# steam-games-database  
+# DropShop online shop
+Analytics of the Steam store, sales recommendations, and reviews.  
+
+
 database was taken from kaggle:  
 https://www.kaggle.com/datasets/antonkozyriev/game-recommendations-on-steam  
 
