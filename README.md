@@ -1,4 +1,4 @@
-# DropShop online shop
+# Ggsel.net online shop
 Analytics of the Steam store, sales recommendations, and reviews.  
 
 
