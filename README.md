@@ -14,6 +14,13 @@ venv\Scripts\activate         # Windows
 pip install mysql-connector-python tabulate  
 CREATE DATABASE games;  
 mysql -u root -p games < dump.sql  
+
+Connect to database using mysql shell:  
+\sql  
+\connect root@localhost:3306  
+show databases;  
+use valorant_stats;  
+
   
 Start:  
 python main.py  
