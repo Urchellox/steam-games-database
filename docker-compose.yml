@@ -1,0 +1,94 @@
+version: '3.8'
+
+services:
+
+  # Prometheus
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.enable-lifecycle'
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - monitoring
+    restart: unless-stopped
+
+   # MySQL Exporter    
+  mysql_exporter:
+    image: prom/mysqld-exporter:latest
+    container_name: mysql_exporter
+    ports:
+      - "9104:9104"
+    command:
+      - '--mysqld.address=host.docker.internal:3306'
+      - '--mysqld.username=yra'
+    environment:
+      MYSQLD_EXPORTER_PASSWORD: '1801'
+    networks:
+      - monitoring
+    restart: unless-stopped
+  # Node Exporter
+  node_exporter:
+    image: prom/node-exporter:latest
+    container_name: node_exporter
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    ports:
+      - "9100:9100"
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+      - /:/host:ro,rslave
+    networks:
+      - monitoring
+    restart: unless-stopped
+    # Windows: delete the volumes above and leave only ports
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    networks:
+      - monitoring
+    restart: unless-stopped
+
+  custom_exporter:
+    image: python:3.11-slim
+    container_name: custom_exporter
+    volumes:
+      - ./custom_exporter.py:/app/custom_exporter.py:ro
+    working_dir: /app
+    command: sh -c "pip install --no-cache-dir prometheus_client requests && python custom_exporter.py"
+    ports:
+      - "8000:8000"
+    networks:
+      - monitoring
+    restart: unless-stopped
+
+
+volumes:
+  prometheus_data: # already exists
+  grafana_data:
+
+networks:
+  monitoring:
+    driver: bridge
